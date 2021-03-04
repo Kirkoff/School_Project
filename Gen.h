@@ -1,5 +1,5 @@
 //
-//  Gen.hpp
+//  Gen.h
 //  Rolling Hash
 //
 #pragma once
@@ -12,3 +12,4 @@
 #include <string>
 
 std::string generate_string(int length, unsigned long long seed);
+long long myRand(long long B);
