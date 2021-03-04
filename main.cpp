@@ -25,15 +25,17 @@
 #include <chrono>
 #include <random>
 #include <bitset>
-#include "HashFucntion.hpp"
-#include "Gen.hpp"
-#include "Get_primes.hpp"
-#include "Test_for_collisions.hpp"
+#include "HashFunction.h"
+#include "Gen.h"
+#include "Get_primes.h"
+#include "Test_for_collisions.h"
 #include <thread>
 //using namespace std;
 
 #pragma GCC target("sse, sse2, sse3, ssse3, sse4, popcnt, abm, mmx, avx, avx2, tune=native")
-//#pragma GCC optimize("O3")
+#pragma GCC optimize("O3")
+
+const int num_of_threads = 6;
 
 
 template<class T>
@@ -44,74 +46,77 @@ std::ostream& operator << (std::ostream& out, std::vector<T>& a) {
     return out;
 }
 
-/*std::mt19937_64 rnG(std::chrono::steady_clock::now().time_since_epoch().count());
-long long myRand(long long B) {
-    return (unsigned long long)rnG() % B;
-}*/
-
-//std::ofstream big_out("all_primes_big.txt");
-//std::ofstream small_out("all_primes_small.txt");
 std::ifstream big_in("all_primes_big.txt");
 std::ifstream small_in("all_primes_small.txt");
 std::ofstream answers_big("Big_Answers.txt");
 std::ofstream answers_small("Small_Answers.txt");
-int main(int argc, const char * argv[]) {
+int main(int argc, const char* argv[]) {
     //freopen("output.txt", "w", stdout);
     std::map<char, int> values;
-    for(char i = 'a'; i <= 'z'; ++i){
+    for (char i = 'a'; i <= 'z'; ++i) {
         values[i] = int(i) - 97;
     }
-    /*std::vector<int> all_primes;
-    all_primes = get_primes(1 << 30);
-    std::cout << "Get finished" << std::endl;
-    for(auto i : all_primes){
-        small_out << i << " ";
-    }
-    std::reverse(all_primes.begin(), all_primes.end());
-    for(auto i : all_primes){
-        big_out << i << " ";
-    }*/
     std::vector<int> small_primes;
     std::vector<int> big_primes;
-    for(int i = 0; i < 1000000; ++i){
+    for (int i = 0; i < 1000000; ++i) {
         int x;
         small_in >> x;
         small_primes.push_back(x);
     }
-    for(int i = 0; i < 1000000; ++i){
+    for (int i = 0; i < 1000000; ++i) {
         int x;
         big_in >> x;
         big_primes.push_back(x);
     }
-    //std::cout << small_primes[0];
-    /*
-    for(auto i : small_primes){
-        std::cout << i << " ";
-    }
-    std::cout << "\nABAB\n";
-    for(auto i : big_primes){
-        std::cout << i << " ";
-    }*/
+    
     //answers << "MOD = ... Prime = ... Collisions = ..."
-    
-    
-    
-    //random big test
-    for(int _ = 0; _ < 1000; ++_){
-        int i = (abs((rand() << 15) + rand())) % (999999);
-        int j = (abs((rand() << 15) + rand())) % (999999);
-        answers_big << big_primes[i] << " ";
-        answers_big << small_primes[j] << " ";
-        answers_big << count_collisions(values, big_primes[i], small_primes[j]) << std::endl;
+
+    //big test
+    for (int _ = 0; _ < 500; ++_) {
+        clock_t start = clock();
+        std::vector<std::vector<int>> ans(num_of_threads, std::vector<int>(3));
+        std::vector<std::thread> threads;
+        for (int __ = 0; __ < num_of_threads; ++__) {
+            int rand1 = myRand(999999);
+            int rand2 = myRand(999999);
+            ans[__][0] = big_primes[rand1];
+            ans[__][1] = small_primes[rand2];
+            threads.push_back(std::thread(count_collisions, values, big_primes[rand1], small_primes[rand2], std::ref(ans[__][2])));
+        }
+        for (auto& cur_thread : threads) {
+            cur_thread.join();
+        }
+        for (std::vector<int> result : ans) {
+            answers_big << result << std::endl;
+        }
+        
+        clock_t end = clock();
+        double seconds = (double)(end - start) / CLOCKS_PER_SEC;
+        printf("The time: %f seconds\n", seconds);
     }
-    
+
     //check for small
-    for(int _ = 0; _ < 1000; ++_){
-        int i = (abs((rand() << 15) + rand())) % (100);
-        int j = (abs((rand() << 15) + rand())) % (100);
-        answers_small << big_primes[i] << " ";
-        answers_small << small_primes[j] << " ";
-        answers_small << count_collisions(values, big_primes[i], small_primes[j]) << std::endl;
+    for (int _ = 0; _ < 500; ++_) {
+        clock_t start = clock();
+        std::vector<std::vector<int>> ans(num_of_threads, std::vector<int>(3));
+        std::vector<std::thread> threads;
+        for (int __ = 0; __ < num_of_threads; ++__) {
+            int rand1 = myRand(1000);
+            int rand2 = myRand(1000);
+            ans[__][0] = big_primes[rand1];
+            ans[__][1] = small_primes[rand2];
+            threads.push_back(std::thread(count_collisions, values, big_primes[rand1], small_primes[rand2], std::ref(ans[__][2])));
+        }
+        for (auto& cur_thread : threads) {
+            cur_thread.join();
+        }
+        for (std::vector<int> result : ans) {
+            answers_small << result << std::endl;
+        }
+        
+        clock_t end = clock();
+        double seconds = (double)(end - start) / CLOCKS_PER_SEC;
+        printf("The time: %f seconds\n", seconds);
     }
     return 0;
 }
