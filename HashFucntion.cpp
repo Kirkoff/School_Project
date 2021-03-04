@@ -3,11 +3,11 @@
 //  Rolling Hash
 //
 #pragma once
-#include "HashFucntion.hpp"
+#include "HashFunction.h"
 
-int get_hash(std::string s, std::map<char, int> values, int MOD, int prime_number){
+int get_hash(std::string s, std::map<char, int> values, int MOD, int prime_number) {
     long long hash = 0;
-    for(auto symbol : s){
+    for (auto symbol : s) {
         hash *= prime_number;
         hash += values[symbol];
         hash %= MOD;
