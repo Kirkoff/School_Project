@@ -1,5 +1,5 @@
 //
-//  Get_primes.hpp
+//  Get_primes.h
 //  Rolling Hash
 //
 
