@@ -1,12 +1,12 @@
 //
-//  HashFucntion.hpp
+//  HashFunction.h
 //  Rolling Hash
 //
 #pragma once
-#ifndef HashFucntion_hpp
-#define HashFucntion_hpp
+#ifndef HashFunction_h
+#define HashFunction_h
 #include <stdio.h>
-#endif /* HashFucntion_hpp */
+#endif /* HashFunction_h */
 #include <string>
 #include <map>
 int get_hash(std::string s, std::map<char, int>, int MOD, int prime_number);
